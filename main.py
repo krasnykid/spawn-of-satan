@@ -15,12 +15,33 @@ logging.basicConfig(
 def main():
     filename = "photos/PXL_20250521_090348880.jpg"
 
-    filesize = os.stat(filename).st_size
-    logging.info(f"file size {filesize} bytes")
-    original_image = Image.open(filename)
-    original_array = np.array(original_image)
-    dimensions = original_image.size
-    logging.info(f"x: {dimensions[0]} y: {dimensions[1]}");
+    gray_image = None
+    canned_image = None
+    resized_image = None
+
+    src = Image.open(filename)
+    src_array = np.array(src)
+    logging.info(f"x: {src.width} y: {src.height}");
+
+    ratio = src.height / 500
+
+    logging.info(f"ratio: {ratio}")
+
+    height = int(src.height / ratio)
+    width = int(src.width / ratio)
+    pixels = width * height
+
+    logging.info("resizing image")
+    resized_image = cv2.resize(src_array, (width, height))
+
+    logging.info("converting to grayscale")
+    gray_image = cv2.cvtColor(resized_image, cv2.COLOR_RGB2GRAY, hint = 4)
+
+    logging.info("gaussian bloor")
+    gblurred_image = cv2.GaussianBlur(gray_image, (5, 5), 0)
+
+    logging.info("canny")
+    canned_image = cv2.Canny(gblurred_image, 75, 200)
 
     # '''create gabor filter'''
     # gfilters = create_gaborfilter()
@@ -28,17 +49,17 @@ def main():
     # '''get filtered image array'''
     # gf_array = apply_filter(original_array, gfilters)
 
-    logging.info("applying gaussian blur")
-    gaussian_blurred = cv2.GaussianBlur(original_array, (5, 5), 200)
+    # logging.info("applying gaussian blur")
+    # gaussian_blurred = cv2.GaussianBlur(src_array, (5, 5), 200)
 
-    logging.info("detecting edges")
-    canny = cv2.Canny(gaussian_blurred, 1, 200)
+    # logging.info("detecting edges")
+    # canny = cv2.Canny(gaussian_blurred, 1, 200)
 
     '''make pil image from array'''
-    gf_image = Image.fromarray(canny)
+    final = Image.fromarray(canned_image)
 
     '''display image'''
-    plt.imshow(np.array(gf_image))
+    plt.imshow(np.array(final))
     plt.tight_layout
     plt.show()
 
