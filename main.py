@@ -1,77 +1,37 @@
-import cv2
 import numpy as np
 import logging
 import matplotlib.pyplot as plt
 from PIL import Image
+from tictoc import tic, toc
+from gfilter import create_gaborfilter, apply_filter
 
 # Basic configuration
 logging.basicConfig(
     level=logging.INFO,  # Set logging.info level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-    format='%(asctime)s - %(levelname)s - %(message)s'  # Log message format
+    format='%(asctime)s [%(funcName)s] %(levelname)s - %(message)s'  # Log message format
 )
 
-def create_gaborfilter():
-    # This function is designed to produce a set of GaborFilters
-    # an even distribution of theta values equally distributed amongst pi rad / 180 degree
+def main():
+    original_image = Image.open('photos/git1.jpg')
+    original_array = np.array(original_image)
 
-    logging.info("creating gabor filter")
+    '''create gabor filter'''
+    tic()
+    gfilters = create_gaborfilter()
+    logging.info(toc())
 
-    filters = []
-    num_filters = 16
-    ksize = 35  # The local area to evaluate
-    sigma = 3.0  # Larger Values produce more edges
-    lambd = 10.0
-    gamma = 0.5
-    psi = 0  # Offset value - lower generates cleaner results
-    for theta in np.arange(0, np.pi, np.pi / num_filters):  # Theta is the orientation for edge detection
-        kern = cv2.getGaborKernel((ksize, ksize), sigma, theta, lambd, gamma, psi, ktype=cv2.CV_64F)
-        kern /= 1.0 * kern.sum()  # Brightness normalization
-        filters.append(kern)
+    '''get filtered image array'''
+    tic()
+    gf_array = apply_filter(original_array, gfilters)
+    logging.info(toc())
 
-    logging.info("created gabor filter")
+    '''make pil image from array'''
+    gf_image = Image.fromarray(gf_array)
 
-    return filters
+    '''display image'''
+    plt.imshow(np.array(gf_image))
+    plt.tight_layout
+    plt.show()
 
-def apply_filter(img, filters):
-# This general function is designed to apply filters to our image
-
-    logging.info("apply_filter: applying gabor filter")
-
-    # First create a numpy array the same size as our input image
-    newimage = np.zeros_like(img)
-
-    # Starting with a blank image, we loop through the images and apply our Gabor Filter
-    # On each iteration, we take the highest value (super impose), until we have the max value across all filters
-    # The final image is returned
-    depth = -1 # remain depth same as original image
-
-    logging.info("apply_filter: looping through kernels")
-    for i, kern in enumerate(filters, start = 0):  # Loop through the kernels in our GaborFilter
-        # image_filter = cv2.filter2D(img, depth, kern)  #Apply filter to image
-        image_filter = cv2.filter2D(img, depth, kern)
-
-        # Using Numpy.maximum to compare our filter and cumulative image, taking the higher value (max)
-        np.maximum(newimage, image_filter, newimage)
-
-        logging.info(f"apply_filter: iteration {i} finished")
-
-    logging.info("apply_filter: applied gabor filter")
-
-    return newimage
-
-original_image = Image.open('photos/git1.jpg')
-original_array = np.array(original_image)
-
-'''create gabor filter'''
-gfilters = create_gaborfilter()
-
-'''get filtered image array'''
-gf_array = apply_filter(original_array, gfilters)
-
-'''make pil image from array'''
-gf_image = Image.fromarray(gf_array)
-
-'''display image'''
-plt.imshow(np.array(gf_image))
-plt.tight_layout
-plt.show()
+if __name__ == "__main__":
+    main()
