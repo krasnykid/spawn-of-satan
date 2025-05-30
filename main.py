@@ -7,6 +7,8 @@ def create_gaborfilter():
     # This function is designed to produce a set of GaborFilters
     # an even distribution of theta values equally distributed amongst pi rad / 180 degree
 
+    print("creating gabor filter")
+
     filters = []
     num_filters = 16
     ksize = 35  # The local area to evaluate
@@ -18,10 +20,15 @@ def create_gaborfilter():
         kern = cv2.getGaborKernel((ksize, ksize), sigma, theta, lambd, gamma, psi, ktype=cv2.CV_64F)
         kern /= 1.0 * kern.sum()  # Brightness normalization
         filters.append(kern)
+
+    print("created gabor filter")
+
     return filters
 
 def apply_filter(img, filters):
 # This general function is designed to apply filters to our image
+
+    print("applying gabor filter")
 
     # First create a numpy array the same size as our input image
     newimage = np.zeros_like(img)
@@ -31,12 +38,16 @@ def apply_filter(img, filters):
     # The final image is returned
     depth = -1 # remain depth same as original image
 
+    print("looping through kernels")
     for kern in filters:  # Loop through the kernels in our GaborFilter
         # image_filter = cv2.filter2D(img, depth, kern)  #Apply filter to image
         image_filter = cv2.filter2D(img, depth, kern)
 
         # Using Numpy.maximum to compare our filter and cumulative image, taking the higher value (max)
         np.maximum(newimage, image_filter, newimage)
+
+    print("applied gabor filter")
+
     return newimage
 
 original_image = Image.open('photos/git1.jpg')
