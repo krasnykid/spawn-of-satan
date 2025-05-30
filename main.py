@@ -2,7 +2,6 @@ import numpy as np
 import logging
 import matplotlib.pyplot as plt
 from PIL import Image
-from tictoc import tic, toc
 from gfilter import create_gaborfilter, apply_filter
 
 # Basic configuration
@@ -16,14 +15,10 @@ def main():
     original_array = np.array(original_image)
 
     '''create gabor filter'''
-    tic()
     gfilters = create_gaborfilter()
-    logging.info(toc())
 
     '''get filtered image array'''
-    tic()
     gf_array = apply_filter(original_array, gfilters)
-    logging.info(toc())
 
     '''make pil image from array'''
     gf_image = Image.fromarray(gf_array)
