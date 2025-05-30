@@ -1,5 +1,6 @@
 import numpy as np
 import os
+import cv2
 import logging
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -21,14 +22,20 @@ def main():
     dimensions = original_image.size
     logging.info(f"x: {dimensions[0]} y: {dimensions[1]}");
 
-    '''create gabor filter'''
-    gfilters = create_gaborfilter()
+    # '''create gabor filter'''
+    # gfilters = create_gaborfilter()
 
-    '''get filtered image array'''
-    gf_array = apply_filter(original_array, gfilters)
+    # '''get filtered image array'''
+    # gf_array = apply_filter(original_array, gfilters)
+
+    logging.info("applying gaussian blur")
+    gaussian_blurred = cv2.GaussianBlur(original_array, (5, 5), 200)
+
+    logging.info("detecting edges")
+    canny = cv2.Canny(gaussian_blurred, 1, 200)
 
     '''make pil image from array'''
-    gf_image = Image.fromarray(gf_array)
+    gf_image = Image.fromarray(canny)
 
     '''display image'''
     plt.imshow(np.array(gf_image))
