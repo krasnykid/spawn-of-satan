@@ -1,4 +1,5 @@
 import numpy as np
+import os
 import logging
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -11,8 +12,14 @@ logging.basicConfig(
 )
 
 def main():
-    original_image = Image.open('photos/git1.jpg')
+    filename = "photos/PXL_20250521_090348880.jpg"
+
+    filesize = os.stat(filename).st_size
+    logging.info(f"file size {filesize} bytes")
+    original_image = Image.open(filename)
     original_array = np.array(original_image)
+    dimensions = original_image.size
+    logging.info(f"x: {dimensions[0]} y: {dimensions[1]}");
 
     '''create gabor filter'''
     gfilters = create_gaborfilter()
