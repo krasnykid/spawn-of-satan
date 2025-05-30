@@ -1,13 +1,20 @@
 import cv2
 import numpy as np
+import logging
 import matplotlib.pyplot as plt
 from PIL import Image
+
+# Basic configuration
+logging.basicConfig(
+    level=logging.INFO,  # Set logging.info level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+    format='%(asctime)s - %(levelname)s - %(message)s'  # Log message format
+)
 
 def create_gaborfilter():
     # This function is designed to produce a set of GaborFilters
     # an even distribution of theta values equally distributed amongst pi rad / 180 degree
 
-    print("creating gabor filter")
+    logging.info("creating gabor filter")
 
     filters = []
     num_filters = 16
@@ -21,14 +28,14 @@ def create_gaborfilter():
         kern /= 1.0 * kern.sum()  # Brightness normalization
         filters.append(kern)
 
-    print("created gabor filter")
+    logging.info("created gabor filter")
 
     return filters
 
 def apply_filter(img, filters):
 # This general function is designed to apply filters to our image
 
-    print("applying gabor filter")
+    logging.info("apply_filter: applying gabor filter")
 
     # First create a numpy array the same size as our input image
     newimage = np.zeros_like(img)
@@ -38,15 +45,17 @@ def apply_filter(img, filters):
     # The final image is returned
     depth = -1 # remain depth same as original image
 
-    print("looping through kernels")
-    for kern in filters:  # Loop through the kernels in our GaborFilter
+    logging.info("apply_filter: looping through kernels")
+    for i, kern in enumerate(filters, start = 0):  # Loop through the kernels in our GaborFilter
         # image_filter = cv2.filter2D(img, depth, kern)  #Apply filter to image
         image_filter = cv2.filter2D(img, depth, kern)
 
         # Using Numpy.maximum to compare our filter and cumulative image, taking the higher value (max)
         np.maximum(newimage, image_filter, newimage)
 
-    print("applied gabor filter")
+        logging.info(f"apply_filter: iteration {i} finished")
+
+    logging.info("apply_filter: applied gabor filter")
 
     return newimage
 
